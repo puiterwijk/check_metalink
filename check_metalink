@@ -96,9 +96,11 @@ import argparse
 import xml.etree.ElementTree as ET
 import hashlib
 import requests
+CAN_FTP = False
 try:
     import requests_ftp
     requests_ftp.monkeypatch_session()
+    CAN_FTP = True
 except ImportError:
     # We won't have FTP urls available...
     #  This is not a problem in this version of the script
@@ -244,6 +246,10 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors):
             if mirror.startswith('rsync:'):
                 if verbosity >= VERBOSE_DEBUG:
                     print '** Cannot check %s: no rsync support' % mirror
+            elif not CAN_FTP and mirror.startswith('ftp:'):
+                if verbosity >= VERBOSE_DEBUG:
+                    print '** Cannot check %s: requests-ftp not installed' \
+                        % mirror
             else:
                 if verbosity >= VERBOSE_DEBUG:
                     print '** Checking %s' % mirror
