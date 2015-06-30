@@ -317,8 +317,6 @@ def _main():
         repos = args.repo.split(',')
     if args.arch is not None:
         arches = args.arch.split(',')
-    any_bad = False
-    any_exceptions = False
     results_ok = []
     results_bad = []
     results_exception = {}
@@ -343,10 +341,8 @@ def _main():
                 if result is True:
                     results_ok.append('%s.%s' % (repo, arch))
                 else:
-                    any_bad = True
                     results_bad.append('%s.%s' % (repo, arch))
             except Exception, ex:
-                any_exceptions = True
                 if args.verbose >= VERBOSE_ERROR:
                     print 'Repo %s, arch %s errored: %s' % (repo, arch, ex)
                 results_exception['%s.%s' % (repo, arch)] = ex
@@ -373,9 +369,9 @@ def _main():
         if args.check_mirrors:
             print 'OK metalink means that at least one mirror is valid'
 
-    if any_bad:
+    if len(results_bad) > 0:
         sys.exit(2)
-    elif any_exceptions:
+    elif len(results_exception) > 0:
         sys.exit(1)
     else:
         sys.exit(0)
