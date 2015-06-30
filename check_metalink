@@ -316,7 +316,7 @@ def _main():
 
     if args.check_mirrors == args.check_master:
         print 'Either check-mirrors or check-master needs to be specified'
-        print 'Please check usage with --usage'
+        print 'Please check usage with --help'
         sys.exit(3)
 
     if args.verbose >= VERBOSE_INFO:
