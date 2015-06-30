@@ -329,6 +329,10 @@ def _main():
         repos = args.repo.split(',')
     if args.arch is not None:
         arches = args.arch.split(',')
+    if args.check_mirrors and (len(arches) + len(repos) > 2):
+        print('When using --check-mirrors, please select a single arch and ' +
+              'a single arch to check')
+        sys.exit(3)
     results_ok = []
     results_bad = []
     results_exception = {}
