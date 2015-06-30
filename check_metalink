@@ -257,12 +257,12 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors):
                             print '** Working: %s' % mirror
                         else:
                             print '** Failed: %s' % mirror
+                    if result:
+                        any_valid = True
                 except Exception, ex:
                     if verbosity >= VERBOSE_DEBUG:
                         print '\tError: %s' % ex
 
-                if result:
-                    any_valid = True
         return any_valid
     else:
         # We only check master mirror
