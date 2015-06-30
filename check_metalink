@@ -298,14 +298,20 @@ def _get_arguments():
                         help='Print a very short overview (suitable ' +
                         'for monitoring)')
     parser.add_argument('--check-mirrors', action='store_true',
-                        help='Check all mirrors for valid files instead of ' +
-                        'the master mirror')
+                        help='Check all mirrors for valid files')
+    parser.add_argument('--check-master', action='store_true',
+                        help='Check master mirror for valid files')
     return parser.parse_args()
 
 
 def _main():
     """Kick the whole stuff off!"""
     args = _get_arguments()
+
+    if args.check_mirrors == args.check_master:
+        print 'Either check-mirrors or check-master needs to be specified'
+        print 'Please check usage with --usage'
+        sys.exit(3)
 
     if args.verbose >= VERBOSE_INFO:
         ses = requests.Session()
