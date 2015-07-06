@@ -327,10 +327,13 @@ def _main():
         print 'Arches: %s' % arches
         return
 
-    if args.check_mirrors == args.check_master:
+    if args.check_mirrors and args.check_master:
         print 'Either check-mirrors or check-master needs to be specified'
         print 'Please check usage with --help'
         sys.exit(3)
+
+    if not args.check_mirrors and not args.check_master:
+        args.check_mirrors = True
 
     if args.verbose >= VERBOSE_INFO:
         ses = requests.Session()
