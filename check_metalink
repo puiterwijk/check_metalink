@@ -345,6 +345,8 @@ def _main():
         repos = args.repo.split(',')
     elif args.check_mirrors:
         vers = platform.linux_distribution()[1]
+        if platform.linux_distribution()[2] == 'Rawhide':
+            vers = 'rawhide'
         if args.verbose >= VERBOSE_DEBUG:
             print 'Defaulting to repos likely used by this system (%s)' % vers
         repos = [repo for repo in repos if vers in repo]
