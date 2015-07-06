@@ -95,6 +95,7 @@ import sys
 import argparse
 import xml.etree.ElementTree as ET
 import hashlib
+import platform
 import requests
 CAN_FTP = False
 try:
@@ -292,8 +293,11 @@ def _get_arguments():
     parser.add_argument('--arch',
                         help='Limit arches checked to this single arch')
     parser.add_argument('--verbose', '-v', action='count',
+                        default=VERBOSE_INFO,
                         help='Verbosity level. Use multiple times for ' +
                         'higher levels')
+    parser.add_argument('--quiet', '-q', action='count', default=0,
+                        help='Decrease verbosity level')
     parser.add_argument('--check-files', action='store_true',
                         help='Be more thorough, and check file ' +
                         'contents on the mirror')
@@ -307,12 +311,21 @@ def _get_arguments():
                         help='Check all mirrors for valid files')
     parser.add_argument('--check-master', action='store_true',
                         help='Check master mirror for valid files')
+    parser.add_argument('--list-repos-arches', action='store_true',
+                        help='Print the repos and arches built in')
     return parser.parse_args()
 
 
 def _main():
     """Kick the whole stuff off!"""
     args = _get_arguments()
+    args.verbose = args.verbose - args.quiet
+
+    if args.list_repos_arches:
+        repos, arches = get_repos_arches()
+        print 'Repos: %s' % repos
+        print 'Arches: %s' % arches
+        return
 
     if args.check_mirrors == args.check_master:
         print 'Either check-mirrors or check-master needs to be specified'
@@ -327,12 +340,19 @@ def _main():
     repos, arches = get_repos_arches()
     if args.repo is not None:
         repos = args.repo.split(',')
+    elif args.check_mirrors:
+        vers = platform.linux_distribution()[1]
+        if args.verbose >= VERBOSE_DEBUG:
+            print 'Defaulting to repos likely used by this system (%s)' % vers
+        repos = [repo for repo in repos if vers in repo]
+
     if args.arch is not None:
         arches = args.arch.split(',')
-    if args.check_mirrors and (len(arches) + len(repos) > 2):
-        print('When using --check-mirrors, please select a single arch and ' +
-              'a single arch to check')
-        sys.exit(3)
+    elif args.check_mirrors:
+        if args.verbose >= VERBOSE_DEBUG:
+            print 'Defaulting to local system architecture'
+        arches = [platform.machine()]
+
     results_ok = []
     results_bad = []
     results_exception = {}
