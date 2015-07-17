@@ -14,8 +14,6 @@ This is a script that checks all metalinks for "watched repos"
 # INSTRUCTIONS. READ THIS!
 # - If you opened this file to update the repos available due to branching
 #    or GA of a release, look at get_repos_arches.
-# - If you opened this file because you got the message
-#    "No dl.fp.o url could be constructed", look at get_master_repo_url.
 # In all other cases, feel free to browse the code. It might benefit from
 #  cleanup here and there, but it Should(R) work. Feel free to ask the author
 #  (listed in the copyright notice above) for any hints/tips.
@@ -54,35 +52,6 @@ def get_repos_arches():
     arches = ['i386', 'x86_64', 'armhfp',
               'ppc64', 'ppc64le', 's390', 's390x', 'aarch64']
     return (repos, arches)
-
-
-def get_master_repo_url(mirror_url):
-    """Function to configure mirror URL to master mirror URL mapping.
-
-    This is used because not all metalinks provide dl.fp.o as a mirror,
-     but we want to check dl.fp.o.
-    So this is used to get a dl.fp.o-link generated from a known local
-     mirror url.
-
-    Note: This function likely makes huge assumptions on the chosen mirror
-     URL structure not really changing that much.
-
-    Feel free to add known-good mirrors.
-    """
-    if 'http://dl.fedoraproject.org/' in mirror_url:
-        # In this case, it's trivial. Yay for triviality!
-        return mirror_url
-    elif 'http://mirror.proserve.nl/' in mirror_url:
-        # This works for puiterwijk (NL)
-        dlurl = mirror_url
-        dlurl = dlurl.replace('http://mirror.proserve.nl/fedora-epel/',
-                              'http://dl.fedoraproject.org/pub/epel/')
-        dlurl = dlurl.replace('http://mirror.proserve.nl/',
-                              'http://dl.fedoraproject.org/pub/')
-        return dlurl
-    elif 'http://ftp-stud.hs-esslingen.de/pub/' in mirror_url:
-        return mirror_url.replace('http://ftp-stud.hs-esslingen.de/pub/',
-                                  'http://dl.fedoraproject.org/pub/')
 
 
 # The real work starts here
@@ -228,7 +197,8 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors):
     if verbosity >= VERBOSE_INFO:
         print 'Testing repo=%s, arch=%s' % (repo, arch)
 
-    mlbaseurl = 'https://mirrors.fedoraproject.org/metalink?repo=%s&arch=%s'
+    mlbaseurl = 'https://mirrors.fedoraproject.org/metalink?repo=%s' + \
+                '&arch=%s&country=global'
 
     mlurl = mlbaseurl % (repo, arch)
 
@@ -274,9 +244,8 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors):
     else:
         # We only check master mirror
         for mirror in parsed['mirrors']:
-            dlurl = get_master_repo_url(mirror)
-            if dlurl is not None:
-                # Success! Now let's continue
+            if 'http://dl.fedoraproject.org/' in mirror:
+                dlurl = mirror
                 break
         if dlurl is None:
             print parsed['mirrors']
