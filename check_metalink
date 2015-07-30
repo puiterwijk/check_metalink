@@ -325,7 +325,10 @@ def _main():
     elif args.check_mirrors:
         if args.verbose >= VERBOSE_DEBUG:
             print 'Defaulting to local system architecture'
-        arches = [platform.machine()]
+        if platform.machine() == 'i686':
+            arches = ['i386']
+        else:
+            arches = [platform.machine()]
 
     results_ok = []
     results_bad = []
