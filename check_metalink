@@ -192,7 +192,8 @@ def _parse_metalink(metalink):
     return info
 
 
-def _check_metalink(repo, arch, verbosity, check_files, check_mirrors):
+def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
+                    mirror_url):
     """This function pulls off the entire check for a repo/arch combination."""
     if verbosity >= VERBOSE_INFO:
         print 'Testing repo=%s, arch=%s' % (repo, arch)
@@ -213,7 +214,10 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors):
 
     if check_mirrors:
         any_valid = False
-        for mirror in parsed['mirrors']:
+        mirror_urls = parsed['mirrors']
+        if mirror_url:
+            mirror_urls = [mirror_url]
+        for mirror in mirror_urls:
             if mirror.startswith('rsync:'):
                 if verbosity >= VERBOSE_DEBUG:
                     print '** Cannot check %s: no rsync support' % mirror
@@ -282,6 +286,9 @@ def _get_arguments():
                         help='Check master mirror for valid files')
     parser.add_argument('--list-repos-arches', action='store_true',
                         help='Print the repos and arches built in')
+    parser.add_argument('--mirror-url', default=None,
+                        help='Mirror root URL to check instead of metalink ' +
+                        'provided URLs')
     return parser.parse_args()
 
 
@@ -350,7 +357,8 @@ def _main():
             try:
                 result = _check_metalink(repo, arch, args.verbose,
                                          args.check_files,
-                                         args.check_mirrors)
+                                         args.check_mirrors,
+                                         args.mirror_url)
                 if result is True:
                     results_ok.append('%s.%s' % (repo, arch))
                 else:
