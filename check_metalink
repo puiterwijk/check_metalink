@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#/bin/python
 """
 Copyright (c) 2015, Patrick Uiterwijk <puiterwijk@redhat.com>
 This script is provided under the GPLv3+ license
