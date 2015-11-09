@@ -1,4 +1,4 @@
-#/bin/python
+#!/bin/python3
 """
 Copyright (c) 2015, Patrick Uiterwijk <puiterwijk@redhat.com>
 This script is provided under the GPLv3+ license
@@ -80,7 +80,7 @@ except ImportError:
 def _check_file(checksum, url, verbosity):
     """This function checks a specific file from a metalink"""
     if verbosity >= VERBOSE_INFO:
-        print '\t\tUrl: %s' % url
+        print('\t\tUrl: %s' % url)
     ses = requests.Session()
     contents = ses.get(url)
 
@@ -90,13 +90,13 @@ def _check_file(checksum, url, verbosity):
 
     if checksum == csum:
         if verbosity >= VERBOSE_DEBUG:
-            print '\t\tValid'
+            print('\t\tValid')
         return True
     else:
         if verbosity >= VERBOSE_DEBUG:
-            print '\t\tINVALID!!'
-            print '\t\t\tMetalink says: %s' % checksum
-            print '\t\t\tActual: %s' % csum
+            print('\t\tINVALID!!')
+            print('\t\t\tMetalink says: %s' % checksum)
+            print('\t\t\tActual: %s' % csum)
         return False
 
 
@@ -107,7 +107,7 @@ def _check_mirror(checksums, url, verbosity, check_files):
      mirror URL: dl.fp.o/.....).
     """
     if url.startswith('rsync://'):
-        print '\tNo idea how to check...'
+        print('\tNo idea how to check...')
         return False
 
     ses = requests.Session()
@@ -118,17 +118,17 @@ def _check_mirror(checksums, url, verbosity, check_files):
     has.update(repomd.text)
     csum = has.hexdigest()
     if verbosity >= VERBOSE_DEBUG:
-        print '\tChecksum: %s' % csum
+        print('\tChecksum: %s' % csum)
 
     if csum not in checksums:
         if verbosity >= VERBOSE_DEBUG:
-            print '\t\tINVALID!!'
-            print '\t\t\tMetalink says: %s' % checksums
-            print '\t\t\tActual: %s' % csum
+            print('\t\tINVALID!!')
+            print('\t\t\tMetalink says: %s' % checksums)
+            print('\t\t\tActual: %s' % csum)
         return False
     else:
         if verbosity >= VERBOSE_DEBUG:
-            print '\t\tValid'
+            print('\t\tValid')
 
     if not check_files:
         # We do not have to check files, mirror is OK
@@ -142,14 +142,14 @@ def _check_mirror(checksums, url, verbosity, check_files):
     for item in parsed.getchildren():
         if item.tag == '{http://linux.duke.edu/metadata/repo}data':
             if verbosity >= VERBOSE_DEBUG:
-                print '\tFile: %s' % item.items()[0][1]
+                print('\tFile: %s' % list(item.items())[0][1])
             file_csum = item.getchildren()[0].text
             file_location = None
             file_csum = None
             for child in item.getchildren():
                 if (child.tag ==
                         '{http://linux.duke.edu/metadata/repo}location'):
-                    file_location = child.items()[0][1]
+                    file_location = list(child.items())[0][1]
                 elif (child.tag ==
                         '{http://linux.duke.edu/metadata/repo}checksum'):
                     file_csum = child.text
@@ -179,7 +179,7 @@ def _parse_metalink(metalink):
     sha256 = verification.getchildren()[2]
     # Using assert is quite hard, but if this isn't sha256, we have no idea
     #  how to use this metalink. Best to barf out soon
-    assert sha256.items()[0][1] == 'sha256'
+    assert list(sha256.items())[0][1] == 'sha256'
     info['checksums'] = [sha256.text]
     if alternatives is not None:
         for alternative in alternatives.getchildren():
@@ -196,7 +196,7 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
                     mirror_url):
     """This function pulls off the entire check for a repo/arch combination."""
     if verbosity >= VERBOSE_INFO:
-        print 'Testing repo=%s, arch=%s' % (repo, arch)
+        print('Testing repo=%s, arch=%s' % (repo, arch))
 
     mlbaseurl = 'https://mirrors.fedoraproject.org/metalink?repo=%s' + \
                 '&arch=%s&country=global'
@@ -206,8 +206,8 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
     ses = requests.Session()
     metalink_res = ses.get(mlurl)
     if verbosity >= VERBOSE_INFO:
-        print '\tMetalink provided by: %s' % metalink_res.headers['appserver']
-        print '\tServer date: %s' % metalink_res.headers['date']
+        print('\tMetalink provided by: %s' % metalink_res.headers['appserver'])
+        print('\tServer date: %s' % metalink_res.headers['date'])
     metalink = metalink_res.text
     parsed = _parse_metalink(metalink)
     dlurl = None
@@ -220,14 +220,14 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
         for mirror in mirror_urls:
             if mirror.startswith('rsync:'):
                 if verbosity >= VERBOSE_DEBUG:
-                    print '** Cannot check %s: no rsync support' % mirror
+                    print('** Cannot check %s: no rsync support' % mirror)
             elif not CAN_FTP and mirror.startswith('ftp:'):
                 if verbosity >= VERBOSE_DEBUG:
-                    print '** Cannot check %s: requests-ftp not installed' \
-                        % mirror
+                    print('** Cannot check %s: requests-ftp not installed' \
+                        % mirror)
             else:
                 if verbosity >= VERBOSE_DEBUG:
-                    print '** Checking %s' % mirror
+                    print('** Checking %s' % mirror)
                 try:
                     result = _check_mirror(parsed['checksums'], mirror,
                                            verbosity,
@@ -235,14 +235,14 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
                     if (verbosity <= VERBOSE_INFO and
                             verbosity >= VERBOSE_ERROR):
                         if result:
-                            print '** Working: %s' % mirror
+                            print('** Working: %s' % mirror)
                         else:
-                            print '** Failed: %s' % mirror
+                            print('** Failed: %s' % mirror)
                     if result:
                         any_valid = True
-                except Exception, ex:
+                except Exception as ex:
                     if verbosity >= VERBOSE_DEBUG:
-                        print '\tError: %s' % ex
+                        print('\tError: %s' % ex)
 
         return any_valid
     else:
@@ -252,7 +252,7 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
                 dlurl = mirror
                 break
         if dlurl is None:
-            print parsed['mirrors']
+            print(parsed['mirrors'])
             raise Exception('No dl.fp.o url could be constructed!')
         return _check_mirror(parsed['checksums'], dlurl, verbosity,
                              check_files)
@@ -299,13 +299,13 @@ def _main():
 
     if args.list_repos_arches:
         repos, arches = get_repos_arches()
-        print 'Repos: %s' % repos
-        print 'Arches: %s' % arches
+        print('Repos: %s' % repos)
+        print('Arches: %s' % arches)
         return
 
     if args.check_mirrors and args.check_master:
-        print 'Either check-mirrors or check-master needs to be specified'
-        print 'Please check usage with --help'
+        print('Either check-mirrors or check-master needs to be specified')
+        print('Please check usage with --help')
         sys.exit(3)
 
     if not args.check_mirrors and not args.check_master:
@@ -314,7 +314,7 @@ def _main():
     if args.verbose >= VERBOSE_INFO:
         ses = requests.Session()
         ip_res = ses.get('https://geoip.fedoraproject.org/city')
-        print 'Client IP: %s' % ip_res.json()['ip']
+        print('Client IP: %s' % ip_res.json()['ip'])
 
     repos, arches = get_repos_arches()
     if args.repo is not None:
@@ -324,14 +324,14 @@ def _main():
         if platform.linux_distribution()[2] == 'Rawhide':
             vers = 'rawhide'
         if args.verbose >= VERBOSE_DEBUG:
-            print 'Defaulting to repos likely used by this system (%s)' % vers
+            print('Defaulting to repos likely used by this system (%s)' % vers)
         repos = [repo for repo in repos if vers in repo]
 
     if args.arch is not None:
         arches = args.arch.split(',')
     elif args.check_mirrors:
         if args.verbose >= VERBOSE_DEBUG:
-            print 'Defaulting to local system architecture'
+            print('Defaulting to local system architecture')
         if platform.machine() == 'i686':
             arches = ['i386']
         else:
@@ -363,32 +363,32 @@ def _main():
                     results_ok.append('%s.%s' % (repo, arch))
                 else:
                     results_bad.append('%s.%s' % (repo, arch))
-            except Exception, ex:
+            except Exception as ex:
                 if args.verbose >= VERBOSE_ERROR:
-                    print 'Repo %s, arch %s errored: %s' % (repo, arch, ex)
+                    print('Repo %s, arch %s errored: %s' % (repo, arch, ex))
                 results_exception['%s.%s' % (repo, arch)] = ex
 
     if not args.no_overview:
-        print 'OK metalinks (%i): %s' % (len(results_ok),
-                                         ', '.join(results_ok))
-        print 'Bad metalinks (%i): %s' % (len(results_bad),
-                                          ', '.join(results_bad))
-        print 'Exception metalinks (%i): %s' % (len(results_exception),
-                                                ', '.join(results_exception))
+        print('OK metalinks (%i): %s' % (len(results_ok),
+                                         ', '.join(results_ok)))
+        print('Bad metalinks (%i): %s' % (len(results_bad),
+                                          ', '.join(results_bad)))
+        print('Exception metalinks (%i): %s' % (len(results_exception),
+                                                ', '.join(results_exception)))
         if args.check_mirrors:
-            print 'OK metalink means that at least one mirror is valid'
+            print('OK metalink means that at least one mirror is valid')
 
     if args.print_short_overview:
         if len(results_bad) == 0:
             if len(results_exception) == 0:
-                print 'All metalinks OK'
+                print('All metalinks OK')
             else:
-                print 'Some metalinks excepted'
+                print('Some metalinks excepted')
         else:
-            print 'Bad metalinks (%i): %s' % (len(results_bad),
-                                              ', '.join(results_bad))
+            print('Bad metalinks (%i): %s' % (len(results_bad),
+                                              ', '.join(results_bad)))
         if args.check_mirrors:
-            print 'OK metalink means that at least one mirror is valid'
+            print('OK metalink means that at least one mirror is valid')
 
     if len(results_bad) > 0:
         sys.exit(2)
