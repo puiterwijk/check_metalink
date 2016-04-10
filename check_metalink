@@ -214,6 +214,7 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
 
     if check_mirrors:
         any_valid = False
+        first_valid = None
         mirror_urls = parsed['mirrors']
         if mirror_url:
             mirror_urls = [mirror_url]
@@ -232,6 +233,8 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
                     result = _check_mirror(parsed['checksums'], mirror,
                                            verbosity,
                                            check_files)
+                    if first_valid is None:
+                        first_valid = result
                     if (verbosity <= VERBOSE_INFO and
                             verbosity >= VERBOSE_ERROR):
                         if result:
@@ -244,7 +247,7 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
                     if verbosity >= VERBOSE_DEBUG:
                         print('\tError: %s' % ex)
 
-        return any_valid
+        return (any_valid, first_valid)
     else:
         # We only check master mirror
         for mirror in parsed['mirrors']:
@@ -254,8 +257,8 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
         if dlurl is None:
             print(parsed['mirrors'])
             raise Exception('No dl.fp.o url could be constructed!')
-        return _check_mirror(parsed['checksums'], dlurl, verbosity,
-                             check_files)
+        return (_check_mirror(parsed['checksums'], dlurl, verbosity,
+                              check_files), True)
 
 
 def _get_arguments():
@@ -338,6 +341,7 @@ def _main():
             arches = [platform.machine()]
 
     results_ok = []
+    results_first_bad = []
     results_bad = []
     results_exception = {}
     for repo in repos:
@@ -355,12 +359,15 @@ def _main():
                 continue
 
             try:
-                result = _check_metalink(repo, arch, args.verbose,
-                                         args.check_files,
-                                         args.check_mirrors,
-                                         args.mirror_url)
-                if result is True:
+                any_valid, first_valid  = _check_metalink(repo, arch,
+                                                          args.verbose,
+                                                          args.check_files,
+                                                          args.check_mirrors,
+                                                          args.mirror_url)
+                if any_valid is True:
                     results_ok.append('%s.%s' % (repo, arch))
+                    if not first_valid:
+                        results_first_bad.append('%s.%s' % (repo, arch))
                 else:
                     results_bad.append('%s.%s' % (repo, arch))
             except Exception as ex:
@@ -371,6 +378,10 @@ def _main():
     if not args.no_overview:
         print('OK metalinks (%i): %s' % (len(results_ok),
                                          ', '.join(results_ok)))
+        if len(results_first_bad) > 0:
+            print 'These repos might not work with DNF (%i): %s' % (
+                len(results_first_bad),
+                ', '.join(results_first_bad))
         print('Bad metalinks (%i): %s' % (len(results_bad),
                                           ', '.join(results_bad)))
         print('Exception metalinks (%i): %s' % (len(results_exception),
