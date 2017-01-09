@@ -316,8 +316,8 @@ def _main():
 
     if args.verbose >= VERBOSE_INFO:
         ses = requests.Session()
-        ip_res = ses.get('https://geoip.fedoraproject.org/city')
-        print('Client IP: %s' % ip_res.json()['ip'])
+        ip_res = ses.get('https://da.gd/ip')
+        print('Client IP: %s' % ip_res.text)
 
     repos, arches = get_repos_arches()
     if args.repo is not None:
