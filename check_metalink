@@ -85,7 +85,7 @@ def _check_file(checksum, url, verbosity):
     contents = ses.get(url)
 
     has = hashlib.sha256()
-    has.update(contents.content)
+    has.update(contents.content.encode('utf8'))
     csum = has.hexdigest()
 
     if checksum == csum:
@@ -115,7 +115,7 @@ def _check_mirror(checksums, url, verbosity, check_files):
 
     # Check checksum
     has = hashlib.sha256()
-    has.update(repomd.text)
+    has.update(repomd.text.encode('utf8'))
     csum = has.hexdigest()
     if verbosity >= VERBOSE_DEBUG:
         print('\tChecksum: %s' % csum)
