@@ -1,4 +1,4 @@
-#!/bin/python
+#!/bin/python3
 """
 Copyright (c) 2015, Patrick Uiterwijk <puiterwijk@redhat.com>
 This script is provided under the GPLv3+ license
@@ -85,7 +85,7 @@ def _check_file(checksum, url, verbosity):
     contents = ses.get(url)
 
     has = hashlib.sha256()
-    has.update(contents.content.encode('utf8'))
+    has.update(contents.content)
     csum = has.hexdigest()
 
     if checksum == csum:
