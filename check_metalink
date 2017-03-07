@@ -379,9 +379,9 @@ def _main():
         print('OK metalinks (%i): %s' % (len(results_ok),
                                          ', '.join(results_ok)))
         if len(results_first_bad) > 0:
-            print 'These repos might not work with DNF (%i): %s' % (
+            print('These repos might not work with DNF (%i): %s' % (
                 len(results_first_bad),
-                ', '.join(results_first_bad))
+                ', '.join(results_first_bad)))
         print('Bad metalinks (%i): %s' % (len(results_bad),
                                           ', '.join(results_bad)))
         print('Exception metalinks (%i): %s' % (len(results_exception),
