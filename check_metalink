@@ -79,8 +79,9 @@ except ImportError:
 
 def _check_file(checksum, url, verbosity):
     """This function checks a specific file from a metalink"""
-    if verbosity >= VERBOSE_INFO:
+    if verbosity >= VERBOSE_DEBUG:
         print('\t\tUrl: %s' % url)
+        print('\t\tExpected: %s' % checksum)
     ses = requests.Session()
     contents = ses.get(url)
 
@@ -88,8 +89,11 @@ def _check_file(checksum, url, verbosity):
     has.update(contents.content)
     csum = has.hexdigest()
 
+    if verbosity >= VERBOSE_DEBUG:
+        print('\t\tCalculated: %s' % csum)
+
     if checksum == csum:
-        if verbosity >= VERBOSE_DEBUG:
+        if verbosity >= VERBOSE_INFO:
             print('\t\tValid')
         return True
     else:
