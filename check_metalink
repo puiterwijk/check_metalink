@@ -210,7 +210,7 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
     ses = requests.Session()
     metalink_res = ses.get(mlurl)
     if verbosity >= VERBOSE_INFO:
-        print('\tMetalink provided by: %s' % metalink_res.headers['appserver'])
+        print('\tMetalink provided by: %s' % metalink_res.headers['server'])
         print('\tServer date: %s' % metalink_res.headers['date'])
     metalink = metalink_res.text
     parsed = _parse_metalink(metalink)
