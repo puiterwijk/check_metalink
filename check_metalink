@@ -43,9 +43,18 @@ def get_repos_arches():
                    'updates-released-source-f',
                    'updates-released-debug-f',
                    'updates-testing-source-f',
-                   'updates-testing-debug-f']
+                   'updates-testing-debug-f',
+                   'fedora-modular-',
+                   'fedora-modular-debug-',
+                   'fedora-modular-source-',
+                   'updates-released-modular-f',
+                   'updates-released-modular-debug-f',
+                   'updates-released-modular-source-f',
+                   'updates-testing-modular-f',
+                   'updates-testing-modular-debug-f',
+                   'updates-testing-modular-source-f']
 
-    repos = ['rawhide', 'epel-5', 'epel-6', 'epel-7']
+    repos = ['rawhide', 'rawhide-modular', 'epel-5', 'epel-6', 'epel-7']
     for version in versions:
         for per_v in per_version:
             repos.append('%s%s' % (per_v, version))
