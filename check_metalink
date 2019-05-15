@@ -143,14 +143,14 @@ def _check_mirror(checksums, url, verbosity, check_files):
     #  core of this version of the script
     parsed = ET.fromstring(repomd.text)
 
-    for item in parsed.getchildren():
+    for item in parsed:
         if item.tag == '{http://linux.duke.edu/metadata/repo}data':
             if verbosity >= VERBOSE_DEBUG:
                 print('\tFile: %s' % list(item.items())[0][1])
-            file_csum = item.getchildren()[0].text
+            file_csum = item[0].text
             file_location = None
             file_csum = None
-            for child in item.getchildren():
+            for child in item:
                 if (child.tag ==
                         '{http://linux.duke.edu/metadata/repo}location'):
                     file_location = list(child.items())[0][1]
@@ -170,27 +170,27 @@ def _parse_metalink(metalink):
     a provided metalink XML text."""
     info = {'mirrors': []}
     metalink = ET.fromstring(metalink)
-    files = metalink.getchildren()[0]
-    repomd = files.getchildren()[0]
-    verification = repomd.getchildren()[2]
-    if len(repomd.getchildren()) == 4:
+    files = metalink[0]
+    repomd = files[0]
+    verification = repomd[2]
+    if len(repomd) == 4:
         alternatives = None
-        resources = repomd.getchildren()[3]
-    elif len(repomd.getchildren()) == 5:
-        alternatives = repomd.getchildren()[3]
-        resources = repomd.getchildren()[4]
+        resources = repomd[3]
+    elif len(repomd) == 5:
+        alternatives = repomd[3]
+        resources = repomd[4]
 
-    sha256 = verification.getchildren()[2]
+    sha256 = verification[2]
     # Using assert is quite hard, but if this isn't sha256, we have no idea
     #  how to use this metalink. Best to barf out soon
     assert list(sha256.items())[0][1] == 'sha256'
     info['checksums'] = [sha256.text]
     if alternatives is not None:
-        for alternative in alternatives.getchildren():
+        for alternative in alternatives:
             info['checksums'].append(
-                alternative.getchildren()[2].getchildren()[2].text)
+                alternative[2][2].text)
 
-    for mirror in resources.getchildren():
+    for mirror in resources:
         info['mirrors'].append(mirror.text)
 
     return info
