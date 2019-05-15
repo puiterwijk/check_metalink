@@ -64,7 +64,8 @@ import sys
 import argparse
 import xml.etree.ElementTree as ET
 import hashlib
-import platform
+# platform obsoleted in 3.5, use distro instead
+from distro import linux_distribution
 import requests
 CAN_FTP = False
 try:
@@ -327,8 +328,8 @@ def _main():
     if args.repo is not None:
         repos = args.repo.split(',')
     elif args.check_mirrors:
-        vers = platform.linux_distribution()[1]
-        if platform.linux_distribution()[2] == 'Rawhide':
+        vers = linux_distribution()[1]
+        if linux_distribution()[2] == 'Rawhide':
             vers = 'rawhide'
         if args.verbose >= VERBOSE_DEBUG:
             print('Defaulting to repos likely used by this system (%s)' % vers)
