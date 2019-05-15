@@ -35,20 +35,33 @@ def get_repos_arches():
 
     This needs regular updates!
     """
-    versions = ['27', '28', '29']
-    per_version = ['updates-released-f',
-                   'updates-testing-f',
-                   'fedora-',
-                   'fedora-source-',
-                   'updates-released-source-f',
-                   'updates-released-debug-f',
-                   'updates-testing-source-f',
-                   'updates-testing-debug-f']
+    types = ['', '-debug', '-source']
+    versions = ['28', '29', '30']
+    per_version = [
+                   'fedora%s-%s',
+                   'updates-released%s-f%s',
+                   'updates-testing%s-f%s',
+                   'fedora-modular%s-%s',
+                   'updates-released-modular%s-f%s',
+                   'updates-testing-modular%s-f%s',
+                  ]
 
-    repos = ['rawhide', 'epel-5', 'epel-6', 'epel-7']
+    no_version = [
+             'rawhide%s',
+             'rawhide-modular%s',
+             'epel%s-5',
+             'epel%s-6',
+             'epel%s-7'
+            ]
+    repos = []
+
     for version in versions:
         for per_v in per_version:
-            repos.append('%s%s' % (per_v, version))
+            for t in types:
+                repos.append(per_v % (t, version))
+    for no_v in no_version:
+        for t in types:
+            repos.append(no_v % (t))
     arches = ['i386', 'x86_64', 'armhfp',
               'ppc64', 'ppc64le', 's390', 's390x', 'aarch64']
     return (repos, arches)
@@ -65,6 +78,8 @@ import argparse
 import xml.etree.ElementTree as ET
 import hashlib
 import platform
+# linux_distrobution() obsoleted in platform  in 3.5, use distro instead
+from distro import linux_distribution
 import requests
 CAN_FTP = False
 try:
@@ -143,14 +158,14 @@ def _check_mirror(checksums, url, verbosity, check_files):
     #  core of this version of the script
     parsed = ET.fromstring(repomd.text)
 
-    for item in parsed.getchildren():
+    for item in parsed:
         if item.tag == '{http://linux.duke.edu/metadata/repo}data':
             if verbosity >= VERBOSE_DEBUG:
                 print('\tFile: %s' % list(item.items())[0][1])
-            file_csum = item.getchildren()[0].text
+            file_csum = item[0].text
             file_location = None
             file_csum = None
-            for child in item.getchildren():
+            for child in item:
                 if (child.tag ==
                         '{http://linux.duke.edu/metadata/repo}location'):
                     file_location = list(child.items())[0][1]
@@ -170,27 +185,27 @@ def _parse_metalink(metalink):
     a provided metalink XML text."""
     info = {'mirrors': []}
     metalink = ET.fromstring(metalink)
-    files = metalink.getchildren()[0]
-    repomd = files.getchildren()[0]
-    verification = repomd.getchildren()[2]
-    if len(repomd.getchildren()) == 4:
+    files = metalink[0]
+    repomd = files[0]
+    verification = repomd[2]
+    if len(repomd) == 4:
         alternatives = None
-        resources = repomd.getchildren()[3]
-    elif len(repomd.getchildren()) == 5:
-        alternatives = repomd.getchildren()[3]
-        resources = repomd.getchildren()[4]
+        resources = repomd[3]
+    elif len(repomd) == 5:
+        alternatives = repomd[3]
+        resources = repomd[4]
 
-    sha256 = verification.getchildren()[2]
+    sha256 = verification[2]
     # Using assert is quite hard, but if this isn't sha256, we have no idea
     #  how to use this metalink. Best to barf out soon
     assert list(sha256.items())[0][1] == 'sha256'
     info['checksums'] = [sha256.text]
     if alternatives is not None:
-        for alternative in alternatives.getchildren():
+        for alternative in alternatives:
             info['checksums'].append(
-                alternative.getchildren()[2].getchildren()[2].text)
+                alternative[2][2].text)
 
-    for mirror in resources.getchildren():
+    for mirror in resources:
         info['mirrors'].append(mirror.text)
 
     return info
@@ -210,7 +225,7 @@ def _check_metalink(repo, arch, verbosity, check_files, check_mirrors,
     ses = requests.Session()
     metalink_res = ses.get(mlurl)
     if verbosity >= VERBOSE_INFO:
-        print('\tMetalink provided by: %s' % metalink_res.headers['appserver'])
+        print('\tMetalink provided by: %s' % metalink_res.headers['server'])
         print('\tServer date: %s' % metalink_res.headers['date'])
     metalink = metalink_res.text
     parsed = _parse_metalink(metalink)
@@ -327,8 +342,8 @@ def _main():
     if args.repo is not None:
         repos = args.repo.split(',')
     elif args.check_mirrors:
-        vers = platform.linux_distribution()[1]
-        if platform.linux_distribution()[2] == 'Rawhide':
+        vers = linux_distribution()[1]
+        if linux_distribution()[2] == 'Rawhide':
             vers = 'rawhide'
         if args.verbose >= VERBOSE_DEBUG:
             print('Defaulting to repos likely used by this system (%s)' % vers)
