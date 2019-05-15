@@ -35,48 +35,33 @@ def get_repos_arches():
 
     This needs regular updates!
     """
+    types = ['', '-debug', '-source']
     versions = ['28', '29', '30']
     per_version = [
-                   'fedora-',
-                   'fedora-debug-',
-                   'fedora-source-',
-                   'updates-released-f',
-                   'updates-released-debug-f',
-                   'updates-released-source-f',
-                   'updates-testing-f',
-                   'updates-testing-debug-f',
-                   'updates-testing-source-f',
-                   'fedora-modular-',
-                   'fedora-modular-debug-',
-                   'fedora-modular-source-',
-                   'updates-released-modular-f',
-                   'updates-released-modular-debug-f',
-                   'updates-released-modular-source-f',
-                   'updates-testing-modular-f',
-                   'updates-testing-modular-debug-f',
-                   'updates-testing-modular-source-f'
+                   'fedora%s-%s',
+                   'updates-released%s-f%s',
+                   'updates-testing%s-f%s',
+                   'fedora-modular%s-%s',
+                   'updates-released-modular%s-f%s',
+                   'updates-testing-modular%s-f%s',
                   ]
 
-    repos = [
-             'rawhide',
-             'rawhide-debug',
-             'rawhide-source',
-             'rawhide-modular',
-             'rawhide-modular-debug',
-             'rawhide-modular-source',
-             'epel-5',
-             'epel-debug-5',
-             'epel-source-5',
-             'epel-6',
-             'epel-debug-6',
-             'epel-source-6',
-             'epel-7'
-             'epel-debug-7',
-             'epel-source-7',
+    no_version = [
+             'rawhide%s',
+             'rawhide-modular%s',
+             'epel%s-5',
+             'epel%s-6',
+             'epel%s-7'
             ]
+    repos = []
+
     for version in versions:
         for per_v in per_version:
-            repos.append('%s%s' % (per_v, version))
+            for t in types:
+                repos.append(per_v % (t, version))
+    for no_v in no_version:
+        for t in types:
+            repos.append(no_v % (t))
     arches = ['i386', 'x86_64', 'armhfp',
               'ppc64', 'ppc64le', 's390', 's390x', 'aarch64']
     return (repos, arches)
