@@ -92,7 +92,8 @@ import sys
 import argparse
 import xml.etree.ElementTree as ET
 import hashlib
-# platform obsoleted in 3.5, use distro instead
+import platform
+# linux_distrobution() obsoleted in platform  in 3.5, use distro instead
 from distro import linux_distribution
 import requests
 CAN_FTP = False
