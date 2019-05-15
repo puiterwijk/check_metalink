@@ -36,14 +36,16 @@ def get_repos_arches():
     This needs regular updates!
     """
     versions = ['28', '29', '30']
-    per_version = ['updates-released-f',
-                   'updates-testing-f',
+    per_version = [
                    'fedora-',
+                   'fedora-debug-',
                    'fedora-source-',
-                   'updates-released-source-f',
+                   'updates-released-f',
                    'updates-released-debug-f',
-                   'updates-testing-source-f',
+                   'updates-released-source-f',
+                   'updates-testing-f',
                    'updates-testing-debug-f',
+                   'updates-testing-source-f',
                    'fedora-modular-',
                    'fedora-modular-debug-',
                    'fedora-modular-source-',
@@ -52,9 +54,26 @@ def get_repos_arches():
                    'updates-released-modular-source-f',
                    'updates-testing-modular-f',
                    'updates-testing-modular-debug-f',
-                   'updates-testing-modular-source-f']
+                   'updates-testing-modular-source-f'
+                  ]
 
-    repos = ['rawhide', 'rawhide-modular', 'epel-5', 'epel-6', 'epel-7']
+    repos = [
+             'rawhide',
+             'rawhide-debug',
+             'rawhide-source',
+             'rawhide-modular',
+             'rawhide-modular-debug',
+             'rawhide-modular-source',
+             'epel-5',
+             'epel-debug-5',
+             'epel-source-5',
+             'epel-6',
+             'epel-debug-6',
+             'epel-source-6',
+             'epel-7'
+             'epel-debug-7',
+             'epel-source-7',
+            ]
     for version in versions:
         for per_v in per_version:
             repos.append('%s%s' % (per_v, version))
