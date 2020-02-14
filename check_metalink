@@ -36,7 +36,7 @@ def get_repos_arches():
     This needs regular updates!
     """
     types = ['', '-debug', '-source']
-    versions = ['29', '30', '31']
+    versions = ['30', '31', '32']
     per_version = [
                    'fedora%s-%s',
                    'updates-released%s-f%s',
@@ -49,9 +49,9 @@ def get_repos_arches():
     no_version = [
              'rawhide%s',
              'rawhide-modular%s',
-             'epel%s-5',
              'epel%s-6',
-             'epel%s-7'
+             'epel%s-7',
+             'epel%s-8'
             ]
     repos = []
 
@@ -74,6 +74,7 @@ VERBOSE_INFO = 2
 VERBOSE_DEBUG = 3
 
 import sys
+import traceback
 import argparse
 import xml.etree.ElementTree as ET
 import hashlib
@@ -392,6 +393,8 @@ def _main():
             except Exception as ex:
                 if args.verbose >= VERBOSE_ERROR:
                     print('Repo %s, arch %s errored: %s' % (repo, arch, ex))
+                    if args.verbose >= VERBOSE_DEBUG:
+                        print(traceback.format_exc())
                 results_exception['%s.%s' % (repo, arch)] = ex
 
     if not args.no_overview:
